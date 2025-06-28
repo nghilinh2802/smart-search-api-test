@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
@@ -12,16 +11,14 @@ import json, os
 
 app = FastAPI()
 
-# Firebase khởi tạo từ biến môi trường (dành cho Render)
+# Firebase init từ biến môi trường
 firebase_key = os.environ.get("FIREBASE_SERVICE_ACCOUNT_KEY")
 cred = credentials.Certificate(json.loads(firebase_key))
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Load model
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# Tải product data từ Firestore
 def load_product_data():
     docs = db.collection("products").stream()
     products = []
@@ -33,7 +30,6 @@ def load_product_data():
 
 df = load_product_data()
 
-# Preprocess
 def clean_text(text):
     text = str(text).lower()
     text = re.sub(r"[^a-z0-9\s]", " ", text)
@@ -47,7 +43,7 @@ df["full_text"] = df["clean_product_name"] + " " + df["clean_product_name"] + " 
 df["price_clean"] = df["price"].apply(lambda p: float(str(p).replace(",", "").strip()) if p else 0)
 df["parent_product_name"] = df["product_name"].apply(lambda name: name.split("-")[0].strip() if "-" in name else name)
 
-# Load embedding từ Firestore
+# Load embeddings từ Firestore
 embedding_docs = db.collection("product_embeddings").stream()
 embedding_map = {}
 for doc in embedding_docs:
@@ -62,11 +58,9 @@ for idx, row in df.iterrows():
         product_embeddings.append(embedding_map[pid])
         valid_ids.append(pid)
 
-# Chỉ giữ lại các sản phẩm có embedding
 df = df[df["id"].isin(valid_ids)].reset_index(drop=True)
 product_embeddings = np.stack(product_embeddings)
 
-# Từ khóa gợi ý
 unique_keywords = set()
 for name in df["product_name"].dropna().unique():
     unique_keywords.add(clean_text(name))
@@ -109,7 +103,6 @@ def parse_price_range(query):
         query = re.sub(r'price\s+under\s+[\d.,]+', '', query, flags=re.IGNORECASE).strip()
     return query.strip(), price_min, price_max
 
-# API
 class SearchRequest(BaseModel):
     query: str
     top_n: int = 10
