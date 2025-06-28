@@ -3,7 +3,7 @@ services:
     name: pet-product-search-api
     env: python
     runtime: python-3.10.13
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
     startCommand: python main.py
     envVars:
       - key: FIREBASE_SERVICE_ACCOUNT_KEY
