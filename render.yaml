@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pet-product-search-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: FIREBASE_SERVICE_ACCOUNT_KEY
+        sync: false
+    plan: free
