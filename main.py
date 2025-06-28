@@ -8,13 +8,18 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials, firestore
+import json
+import os
+
+
 
 # Khởi tạo app FastAPI
 app = FastAPI()
 
 # Khởi tạo Firebase
-cred = credentials.Certificate("serviceAccountKey.json")  # Đảm bảo file này nằm cùng thư mục
-firebase_admin.initialize_app(cred)
+
+firebase_key = os.environ.get("FIREBASE_SERVICE_ACCOUNT_KEY")
+cred = credentials.Certificate(json.loads(firebase_key))firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Load model SBERT
