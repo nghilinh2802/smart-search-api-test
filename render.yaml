@@ -2,6 +2,7 @@ services:
   - type: web
     name: pet-product-search-api
     env: python
+    runtime: python-3.10.13
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
     envVars:
